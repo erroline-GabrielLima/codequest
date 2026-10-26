@@ -41,9 +41,10 @@ function setAuthMode(nextMode) {
   authFeedback.textContent = '';
 }
 
-function showAuthMessage(message, isError = false) {
+function showAuthMessage(message, isError = false, isConfirmation = false) {
   authFeedback.textContent = message;
   authFeedback.style.color = isError ? '#ff9e9e' : '';
+  authFeedback.classList.toggle('email-confirmation-notice', isConfirmation);
 }
 
 function authErrorMessage(error) {
@@ -315,7 +316,7 @@ authForm.addEventListener('submit', async (event) => {
         currentUser = data.user;
         await openProfilePicker();
       } else {
-        showAuthMessage('Conta criada. Confira seu e-mail para confirmar e depois entre.');
+        showAuthMessage('Conta criada! Abra o e-mail do CodeQuest e clique em “Confirmar e-mail”. Depois volte aqui para entrar. Se não encontrar, confira o spam.', false, true);
       }
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
