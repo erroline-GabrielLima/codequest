@@ -46,6 +46,16 @@ function showAuthMessage(message, isError = false) {
   authFeedback.style.color = isError ? '#ff9e9e' : '';
 }
 
+function authErrorMessage(error) {
+  if (error.code === 'over_email_send_rate_limit' || error.message?.toLowerCase().includes('email rate limit exceeded')) {
+    return 'O limite temporário de e-mails do Supabase foi atingido. Aguarde um pouco e tente novamente. Para enviar confirmações a amigos, o projeto precisa de SMTP próprio.';
+  }
+  if (error.code === 'email_address_not_authorized') {
+    return 'O envio padrão do Supabase só atende endereços autorizados. Para aceitar cadastros de amigos, configure um SMTP próprio.';
+  }
+  return error.message || 'Não foi possível entrar. Confira os dados e tente novamente.';
+}
+
 function showProfileMessage(message, isError = false) {
   profileFeedback.textContent = message;
   profileFeedback.style.color = isError ? '#ff9e9e' : '';
@@ -314,7 +324,7 @@ authForm.addEventListener('submit', async (event) => {
       await openProfilePicker();
     }
   } catch (error) {
-    showAuthMessage(error.message || 'Não foi possível entrar. Confira os dados e tente novamente.', true);
+    showAuthMessage(authErrorMessage(error), true);
   } finally {
     authSubmit.disabled = false;
   }
