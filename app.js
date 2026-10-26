@@ -404,7 +404,10 @@ async function start() {
     return;
   }
 
-  supabase = createClient(url, publishableKey);\n  void loadLeaderboard();\n  window.setInterval(loadLeaderboard, 30000);\n  window.addEventListener('focus', loadLeaderboard);
+  supabase = createClient(url, publishableKey);
+  void loadLeaderboard();
+  window.setInterval(loadLeaderboard, 30000);
+  window.addEventListener('focus', loadLeaderboard);
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
       currentUser = null;
