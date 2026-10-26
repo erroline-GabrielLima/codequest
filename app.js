@@ -103,7 +103,7 @@ function drawProfiles(profiles) {
   }
 }
 
-async function openProfilePicker() {
+async function openProfilePicker(restoreLastProfile = true) {
   showScreen('profiles');
   showProfileMessage('Carregando perfis…');
 
@@ -118,9 +118,11 @@ async function openProfilePicker() {
 
     drawProfiles(profiles);
     showProfileMessage('');
-    const savedProfileId = localStorage.getItem(`codequest-profile-${currentUser.id}`);
-    const savedProfile = profiles.find((profile) => profile.id === savedProfileId);
-    if (savedProfile) activateProfile(savedProfile);
+    if (restoreLastProfile) {
+      const savedProfileId = localStorage.getItem(`codequest-profile-${currentUser.id}`);
+      const savedProfile = profiles.find((profile) => profile.id === savedProfileId);
+      if (savedProfile) activateProfile(savedProfile);
+    }
   } catch (error) {
     showProfileMessage(error.message || 'Não foi possível carregar os perfis.', true);
   }
@@ -219,7 +221,7 @@ profileForm.addEventListener('submit', async (event) => {
   }
 });
 
-document.querySelector('#active-profile').addEventListener('click', openProfilePicker);
+document.querySelector('#active-profile').addEventListener('click', () => openProfilePicker(false));
 document.querySelector('#logout-button').addEventListener('click', signOut);
 document.querySelector('#header-logout').addEventListener('click', signOut);
 
