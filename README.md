@@ -16,7 +16,8 @@ O arquivo de configuração usa somente valores públicos. Nunca use a chave `se
 
 - Pessoas criam uma conta com e-mail e senha; o Supabase pode pedir confirmação do e-mail conforme as configurações do projeto.
 - Cada conta pode criar vários perfis e selecionar qual usar.
-- As respostas do desafio continuam sendo rascunhos locais neste MVP. O placar é demonstrativo.
+- O desafio exibido é um exemplo inicial; respostas ficam como rascunhos locais neste MVP.
+- O placar comunitário ainda não compartilha resultados entre contas.
 - O site não executa código submetido.
 
 `supabase-js` é carregado como módulo ES pelo CDN esm.sh. O app não precisa de servidor próprio nem de dependências locais.
