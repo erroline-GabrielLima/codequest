@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10131c" />
+    <meta name="description" content="Desafios semanais de programação para aprender construindo." />
+    <title>CodeQuest — aprenda fazendo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section class="gate-screen" id="auth-screen" aria-labelledby="auth-title">
+      <div class="gate-card">
+        <a class="brand gate-brand" href="#inicio"><span class="brand-mark">&lt;/&gt;</span> codequest</a>
+        <p class="eyebrow">SUA PRÓXIMA MISSÃO COMEÇA AQUI</p>
+        <h1 id="auth-title">Entre na<br /><span>sua jornada.</span></h1>
+        <p class="gate-description">Entre ou crie sua conta para escolher seu perfil e acompanhar os desafios.</p>
+        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+          <button class="auth-tab selected" id="login-tab" type="button" role="tab" aria-selected="true">Entrar</button>
+          <button class="auth-tab" id="signup-tab" type="button" role="tab" aria-selected="false">Criar conta</button>
+        </div>
+        <form id="auth-form">
+          <label class="field-label signup-only" for="auth-name" hidden>SEU NOME</label>
+          <input class="signup-only" id="auth-name" name="name" autocomplete="name" placeholder="Como podemos te chamar?" hidden />
+          <label class="field-label" for="auth-email">E-MAIL</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required />
+          <label class="field-label" for="auth-password">SENHA</label>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Pelo menos 8 caracteres" required />
+          <button class="button button-primary auth-submit" id="auth-submit" type="submit">Entrar <span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="gate-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        <p class="gate-footnote">Suas credenciais são protegidas pelo serviço de autenticação.</p>
+      </div>
+    </section>
+
+    <section class="gate-screen" id="profile-screen" aria-labelledby="profile-title" hidden>
+      <div class="gate-card profile-card">
+        <a class="brand gate-brand" href="#inicio"><span class="brand-mark">&lt;/&gt;</span> codequest</a>
+        <p class="eyebrow">CONTA CONECTADA</p>
+        <h1 id="profile-title">Quem vai<br /><span>jogar hoje?</span></h1>
+        <div class="profile-list" id="profile-list" aria-live="polite"></div>
+        <form class="new-profile-form" id="profile-form">
+          <label class="field-label" for="profile-name">CRIAR NOVO PERFIL</label>
+          <div class="profile-create-row"><input id="profile-name" name="profileName" maxlength="32" placeholder="Nome do perfil" required /><button class="button button-primary" type="submit" aria-label="Criar perfil">+</button></div>
+        </form>
+        <button class="text-button" id="logout-button" type="button">Sair da conta</button>
+        <p class="gate-feedback" id="profile-feedback" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <div id="app-shell" hidden>
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="CodeQuest, início"><span class="brand-mark">&lt;/&gt;</span> codequest</a>
+      <nav aria-label="Navegação principal">
+        <a class="nav-link active" href="#desafio">Desafio</a>
+        <a class="nav-link" href="#envio">Meu envio</a>
+        <a class="nav-link" href="#placar">Placar</a>
+      </nav>
+      <div class="account-actions"><button class="active-profile" id="active-profile" type="button" aria-label="Trocar perfil"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></button><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" id="desafio">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="live-dot"></span> TEMPORADA 01 <span class="eyebrow-sep">/</span> SEMANA 01</p>
+          <h1>Uma missão.<br /><span>Uma semana.</span></h1>
+          <p class="hero-description">Aprenda programação resolvendo desafios curtos, junto com outras pessoas.</p>
+          <a class="button button-primary" href="#envio">Ver meu desafio <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="quest-card"><span class="quest-symbol">{ }</span><span class="quest-card-label">QUEST<br />01</span></div>
+          <span class="spark spark-one">✳</span><span class="spark spark-two">✦</span>
+        </div>
+        <div class="hero-footer"><span>DESAFIO ABERTO</span><span class="countdown">ENCERRA EM <strong>5 DIAS</strong></span></div>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel challenge-panel">
+          <div class="section-heading"><div><p class="eyebrow">MISSÃO DA SEMANA</p><h2>O primeiro passo</h2></div><span class="difficulty">INICIANTE</span></div>
+          <p class="challenge-text">Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.</p>
+          <div class="example"><span class="example-label">EXEMPLO</span><code>Entrada: <b>"Lia"</b><br />Saída: <b>"Olá, Lia!"</b></code></div>
+          <div class="challenge-meta"><span>◷ &nbsp; 15–30 min</span><span>◎ &nbsp; Lógica básica</span></div>
+        </section>
+
+        <section class="panel submit-panel" id="envio">
+          <div class="section-heading"><div><p class="eyebrow">SUA RESPOSTA</p><h2>Envie sua solução</h2></div><span class="step-number">01</span></div>
+          <label class="field-label" for="language">LINGUAGEM</label>
+          <select id="language" name="language"><option>JavaScript</option><option>Python</option><option>Java</option><option>C</option><option>Outra</option></select>
+          <label class="field-label" for="solution">LINK OU DESCRIÇÃO DA SOLUÇÃO</label>
+          <textarea id="solution" name="solution" rows="4" placeholder="Cole o link do seu código ou conte como resolveu..."></textarea>
+          <div class="form-footer"><span class="local-note">Seu rascunho fica salvo neste navegador.</span><button class="button button-primary" id="submit-button" type="button">Salvar envio <span aria-hidden="true">↗</span></button></div>
+          <p class="form-feedback" id="feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel leaderboard-panel" id="placar">
+          <div class="section-heading"><div><p class="eyebrow">COMUNIDADE</p><h2>Placar da semana</h2></div><span class="participants">12 PARTICIPANTES</span></div>
+          <div class="leaderboard-row"><span class="rank">01</span><span class="avatar avatar-green">M</span><span class="player-name">Marina</span><span class="score">100 <small>XP</small></span></div>
+          <div class="leaderboard-row"><span class="rank">02</span><span class="avatar avatar-purple">R</span><span class="player-name">Ravi</span><span class="score">90 <small>XP</small></span></div>
+          <div class="leaderboard-row you"><span class="rank">03</span><span class="avatar avatar-orange">A</span><span class="player-name">Alex <small>VOCÊ</small></span><span class="score">80 <small>XP</small></span></div>
+          <p class="leaderboard-note">O placar é demonstrativo nesta primeira versão.</p>
+        </section>
+
+        <aside class="side-note"><span class="note-icon">✦</span><p><strong>Feito é melhor que perfeito.</strong><br />Compartilhe sua tentativa e evolua uma semana de cada vez.</p></aside>
+      </div>
+    </main>
+    <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>FEITO PARA APRENDER, UM DESAFIO POR VEZ.</span></footer>
+    <script src="supabase-config.js"></script>
+    <script type="module" src="app.js"></script>
+    </div>
+  </body>
+</html>
