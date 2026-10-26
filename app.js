@@ -46,6 +46,16 @@ function showAuthMessage(message, isError = false) {
   authFeedback.style.color = isError ? '#ff9e9e' : '';
 }
 
+function authErrorMessage(error) {
+  if (error.code === 'over_email_send_rate_limit' || error.message?.toLowerCase().includes('email rate limit exceeded')) {
+    return 'O limite temporário de e-mails do Supabase foi atingido. Aguarde um pouco e tente novamente. Para enviar confirmações a amigos, o projeto precisa de SMTP próprio.';
+  }
+  if (error.code === 'email_address_not_authorized') {
+    return 'O envio padrão do Supabase só atende endereços autorizados. Para aceitar cadastros de amigos, configure um SMTP próprio.';
+  }
+  return error.message || 'Não foi possível entrar. Confira os dados e tente novamente.';
+}
+
 function showProfileMessage(message, isError = false) {
   profileFeedback.textContent = message;
   profileFeedback.style.color = isError ? '#ff9e9e' : '';
@@ -54,6 +64,94 @@ function showProfileMessage(message, isError = false) {
 function initials(name) {
   return (name.trim()[0] || '?').toLocaleUpperCase('pt-BR');
 }
+
+function renderLeaderboardState(container, message) {
+  container.replaceChildren();
+  const empty = document.createElement('div');
+  empty.className = 'leaderboard-empty';
+  const icon = document.createElement('span');
+  icon.className = 'note-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '✦';
+  const copy = document.createElement('div');
+  const title = document.createElement('strong');
+  title.textContent = message;
+  copy.append(title);
+  empty.append(icon, copy);
+  container.append(empty);
+}
+
+function drawLeaderboard(entries) {
+  const targets = [
+    { list: document.querySelector('#auth-leaderboard-list'), count: document.querySelector('#auth-leaderboard-count') },
+    { list: document.querySelector('#leaderboard-list'), count: document.querySelector('#leaderboard-count') },
+  ];
+
+  for (const target of targets) {
+    if (!target.list || !target.count) continue;
+    target.count.textContent = entries.length + (entries.length === 1 ? ' PARTICIPANTE' : ' PARTICIPANTES');
+    target.list.replaceChildren();
+
+    if (entries.length === 0) {
+      renderLeaderboardState(target.list, 'Aguardando os primeiros participantes');
+      continue;
+    }
+
+    entries.forEach((entry, index) => {
+      const row = document.createElement('div');
+      row.className = 'leaderboard-row';
+
+      const rank = document.createElement('span');
+      rank.className = 'rank';
+      rank.textContent = String(index + 1).padStart(2, '0');
+
+      const avatar = document.createElement('span');
+      avatar.className = 'avatar avatar-green';
+      avatar.textContent = initials(entry.profile_name);
+
+      const name = document.createElement('span');
+      name.className = 'player-name';
+      name.textContent = entry.profile_name;
+
+      const score = document.createElement('span');
+      score.className = 'score';
+      const total = document.createElement('span');
+      total.textContent = String(entry.submissions_count);
+      const label = document.createElement('small');
+      label.textContent = entry.submissions_count === 1 ? ' envio' : ' envios';
+      score.append(total, label);
+
+      row.append(rank, avatar, name, score);
+      target.list.append(row);
+    });
+  }
+}
+
+async function loadLeaderboard() {
+  if (!supabase) return;
+
+  const lists = [
+    document.querySelector('#auth-leaderboard-list'),
+    document.querySelector('#leaderboard-list'),
+  ].filter(Boolean);
+
+  try {
+    const { data, error } = await supabase
+      .from('challenge_leaderboard')
+      .select('profile_name, submissions_count, last_submitted_at')
+      .order('submissions_count', { ascending: false })
+      .order('last_submitted_at', { ascending: true })
+      .limit(50);
+
+    if (error) throw error;
+    drawLeaderboard(data || []);
+  } catch {
+    for (const list of lists) {
+      renderLeaderboardState(list, 'Não foi possível carregar o placar. Atualize a página para tentar novamente.');
+    }
+  }
+}
+
 
 async function fetchProfiles() {
   const { data, error } = await supabase
@@ -128,15 +226,17 @@ async function openProfilePicker(restoreLastProfile = true) {
   }
 }
 
-function activateProfile(profile) {
+async function activateProfile(profile) {
   currentProfile = profile;
-  localStorage.setItem(`codequest-profile-${currentUser.id}`, profile.id);
+  localStorage.setItem('codequest-profile-' + currentUser.id, profile.id);
   selectedProfileLabel.textContent = profile.name;
   selectedProfileAvatar.textContent = initials(profile.name);
 
   const answerField = document.querySelector('#solution');
   const languageField = document.querySelector('#language');
-  const savedDraft = localStorage.getItem(`codequest-week-01-${profile.id}`);
+  const feedback = document.querySelector('#feedback');
+  const savedDraft = localStorage.getItem('codequest-week-01-' + profile.id);
+
   if (savedDraft) {
     try {
       const draft = JSON.parse(savedDraft);
@@ -151,6 +251,35 @@ function activateProfile(profile) {
   }
 
   showScreen('app');
+  feedback.textContent = 'Carregando envio salvo…';
+  feedback.style.color = '';
+
+  try {
+    const { data, error } = await supabase
+      .from('challenge_submissions')
+      .select('answer, language')
+      .eq('profile_id', profile.id)
+      .eq('challenge_id', 'week-01')
+      .maybeSingle();
+
+    if (currentProfile?.id !== profile.id) return;
+    if (error) throw error;
+    if (data) {
+      answerField.value = data.answer;
+      languageField.value = data.language;
+      localStorage.setItem('codequest-week-01-' + profile.id, JSON.stringify({
+        answer: data.answer,
+        language: data.language,
+        savedAt: new Date().toISOString(),
+      }));
+    }
+    feedback.textContent = '';
+  } catch {
+    if (currentProfile?.id === profile.id) {
+      feedback.textContent = 'Não foi possível carregar o envio salvo. Seu rascunho continua disponível.';
+      feedback.style.color = '#ff9e9e';
+    }
+  }
 }
 
 async function signOut() {
@@ -195,7 +324,7 @@ authForm.addEventListener('submit', async (event) => {
       await openProfilePicker();
     }
   } catch (error) {
-    showAuthMessage(error.message || 'Não foi possível entrar. Confira os dados e tente novamente.', true);
+    showAuthMessage(authErrorMessage(error), true);
   } finally {
     authSubmit.disabled = false;
   }
@@ -225,23 +354,55 @@ document.querySelector('#active-profile').addEventListener('click', () => openPr
 document.querySelector('#logout-button').addEventListener('click', signOut);
 document.querySelector('#header-logout').addEventListener('click', signOut);
 
-document.querySelector('#submit-button').addEventListener('click', () => {
+document.querySelector('#submit-button').addEventListener('click', async () => {
   const answerField = document.querySelector('#solution');
   const languageField = document.querySelector('#language');
   const feedback = document.querySelector('#feedback');
+  const submitButton = document.querySelector('#submit-button');
   const answer = answerField.value.trim();
+
   if (!answer) {
-    feedback.textContent = 'Escreva sua solução ou cole um link antes de salvar.';
+    feedback.textContent = 'Escreva sua solução antes de enviar.';
     answerField.focus();
     return;
   }
 
-  localStorage.setItem(`codequest-week-01-${currentProfile.id}`, JSON.stringify({
+  if (!currentUser || !currentProfile) {
+    feedback.textContent = 'Entre e escolha um perfil para enviar sua solução.';
+    feedback.style.color = '#ff9e9e';
+    return;
+  }
+
+  const draftKey = 'codequest-week-01-' + currentProfile.id;
+  localStorage.setItem(draftKey, JSON.stringify({
     answer,
     language: languageField.value,
     savedAt: new Date().toISOString(),
   }));
-  feedback.textContent = 'Rascunho salvo neste navegador. Boa missão!';
+
+  submitButton.disabled = true;
+  feedback.style.color = '';
+  feedback.textContent = 'Enviando sua solução…';
+
+  try {
+    const { error } = await supabase
+      .from('challenge_submissions')
+      .upsert({
+        profile_id: currentProfile.id,
+        challenge_id: 'week-01',
+        answer,
+        language: languageField.value,
+      }, { onConflict: 'profile_id,challenge_id' });
+
+    if (error) throw error;
+    feedback.textContent = 'Envio registrado. O placar conta desafios enviados; as respostas não são avaliadas automaticamente.';
+    await loadLeaderboard();
+  } catch (error) {
+    feedback.textContent = 'Não foi possível enviar agora. Seu rascunho continua salvo. ' + (error.message || 'Tente novamente.');
+    feedback.style.color = '#ff9e9e';
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 async function start() {
@@ -254,6 +415,9 @@ async function start() {
   }
 
   supabase = createClient(url, publishableKey);
+  void loadLeaderboard();
+  window.setInterval(loadLeaderboard, 30000);
+  window.addEventListener('focus', loadLeaderboard);
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
       currentUser = null;

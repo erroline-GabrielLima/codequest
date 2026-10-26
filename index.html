@@ -30,6 +30,7 @@
         </form>
         <p class="gate-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
         <p class="gate-footnote">Suas credenciais são protegidas pelo serviço de autenticação.</p>
+        <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Ordenado por desafios enviados. As soluções ainda não são avaliadas automaticamente.</p></section>
       </div>
     </section>
 
@@ -88,14 +89,15 @@
           <label class="field-label" for="language">LINGUAGEM</label>
           <select id="language" name="language"><option>JavaScript</option><option>Python</option><option>Java</option><option>C</option><option>Outra</option></select>
           <label class="field-label" for="solution">LINK OU DESCRIÇÃO DA SOLUÇÃO</label>
-          <textarea id="solution" name="solution" rows="4" placeholder="Cole o link do seu código ou conte como resolveu..."></textarea>
-          <div class="form-footer"><span class="local-note">Seu rascunho fica salvo neste navegador.</span><button class="button button-primary" id="submit-button" type="button">Salvar envio <span aria-hidden="true">↗</span></button></div>
+          <textarea id="solution" name="solution" rows="4" maxlength="20000" placeholder="Cole o link do seu código ou conte como resolveu..."></textarea>
+          <div class="form-footer"><span class="local-note">Seu envio ficará salvo na sua conta.</span><button class="button button-primary" id="submit-button" type="button">Enviar solução <span aria-hidden="true">↗</span></button></div>
           <p class="form-feedback" id="feedback" role="status" aria-live="polite"></p>
         </section>
 
         <section class="panel leaderboard-panel" id="placar">
-          <div class="section-heading"><div><p class="eyebrow">PLACAR</p><h2>Comunidade</h2></div><span class="participants">EM BREVE</span></div>
-          <div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Sem resultados por enquanto</strong><p>Este MVP ainda não compartilha os envios entre contas. O placar aparece quando essa função for conectada.</p></div></div>
+          <div class="section-heading"><div><p class="eyebrow">PLACAR</p><h2>Placar geral</h2></div><span class="participants" id="leaderboard-count">CARREGANDO</span></div>
+          <div id="leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div>
+          <p class="leaderboard-note">Ordenado por desafios enviados. As soluções ainda não são avaliadas automaticamente.</p>
         </section>
 
         <aside class="side-note"><span class="note-icon">✦</span><p><strong>Feito é melhor que perfeito.</strong><br />Escolha seu perfil e comece pelo desafio inicial.</p></aside>
