@@ -32,7 +32,10 @@ create policy "Owners can delete their game profiles"
   using ((select auth.uid()) = owner_id);
 
 grant select, insert, update, delete on public.game_profiles to authenticated;
-\n\n-- Live submissions and a public leaderboard with aggregate counts only.\ncreate table if not exists public.challenges (
+
+
+-- Live submissions and a public leaderboard with aggregate counts only.
+create table if not exists public.challenges (
   id text primary key,
   title text not null
 );
