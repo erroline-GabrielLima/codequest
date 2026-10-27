@@ -221,8 +221,9 @@ create policy "Owners can remove educators"
 alter table public.challenges
   add column if not exists description text not null default '',
   add column if not exists difficulty text not null default 'INICIANTE',
-  add column if not exists example_input text not null default '"Lia"',
-  add column if not exists example_output text not null default '"Olá, Lia!"',
+  add column if not exists example_input text not null default '',
+  add column if not exists example_output text not null default '',
+  add column if not exists example_text text not null default '',
   add column if not exists points integer not null default 10,
   add column if not exists starts_at timestamptz,
   add column if not exists ends_at timestamptz,
@@ -231,6 +232,14 @@ alter table public.challenges
 update public.challenges
 set description = 'Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.'
 where id = 'week-01' and description = '';
+
+update public.challenges
+set example_text = '', example_input = '', example_output = ''
+where example_text = '' and example_input = '"Lia"' and example_output = '"Olá, Lia!"';
+
+alter table public.challenges
+  alter column example_input set default '',
+  alter column example_output set default '';
 
 do $$
 begin
@@ -280,7 +289,8 @@ alter table public.challenge_submissions
   add column if not exists status text not null default 'pending',
   add column if not exists review_feedback text,
   add column if not exists reviewed_by uuid references auth.users (id) on delete set null,
-  add column if not exists reviewed_at timestamptz;
+  add column if not exists reviewed_at timestamptz,
+  add column if not exists awarded_points integer;
 
 do $$
 begin
@@ -289,16 +299,26 @@ begin
       add constraint challenge_submissions_status_check
       check (status in ('pending', 'approved', 'changes_requested'));
   end if;
+  if not exists (select 1 from pg_constraint where conname = 'challenge_submissions_awarded_points_check') then
+    alter table public.challenge_submissions
+      add constraint challenge_submissions_awarded_points_check
+      check (awarded_points is null or awarded_points between 0 and 1000);
+  end if;
 end
 $$;
 
 alter table public.challenge_submissions enable row level security;
 revoke all on public.challenge_submissions from public, anon, authenticated;
 grant select on public.challenge_submissions to authenticated;
+update public.challenge_submissions cs
+set awarded_points = c.points
+from public.challenges c
+where cs.challenge_id = c.id
+  and cs.status = 'approved'
+  and cs.awarded_points is null;
 grant insert (profile_id, challenge_id, answer, language) on public.challenge_submissions to authenticated;
-grant update (answer, language, status, review_feedback, reviewed_by, reviewed_at)
+grant update (answer, language, status, review_feedback, reviewed_by, reviewed_at, awarded_points)
   on public.challenge_submissions to authenticated;
-grant update (status, review_feedback, reviewed_by, reviewed_at) on public.challenge_submissions to authenticated;
 
 drop policy if exists "Owners can read their challenge submissions" on public.challenge_submissions;
 create policy "Owners and admins can read challenge submissions"
@@ -404,7 +424,7 @@ begin
   select coalesce(sum(awards.points), 0), count(*), max(awards.last_submitted_at)
   into total_points, total_approved, latest_approved
   from (
-    select cs.challenge_id, max(c.points) as points, max(cs.submitted_at) as last_submitted_at
+    select cs.challenge_id, max(coalesce(cs.awarded_points, c.points)) as points, max(cs.submitted_at) as last_submitted_at
     from public.challenge_submissions cs
     join public.challenges c on c.id = cs.challenge_id
     where cs.profile_id = target_profile_id
@@ -471,6 +491,7 @@ begin
     new.review_feedback := null;
     new.reviewed_by := null;
     new.reviewed_at := null;
+    new.awarded_points := null;
   end if;
   return new;
 end;
@@ -486,7 +507,7 @@ create trigger reset_submission_review_on_edit
   for each row execute function private.reset_submission_review_on_edit();
 
 create trigger sync_submission_leaderboard
-  after insert or delete or update of profile_id, challenge_id, answer, language, status
+  after insert or delete or update of profile_id, challenge_id, answer, language, status, awarded_points
   on public.challenge_submissions
   for each row execute function private.sync_submission_leaderboard();
 
