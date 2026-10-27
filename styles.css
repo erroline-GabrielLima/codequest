@@ -14,3 +14,13 @@
 .admin-mode #app-shell main > .hero,.admin-mode #app-shell main > .content-grid{display:none!important}.admin-mode #admin-panel{margin-top:0;padding-top:20px}.admin-mode #admin-link{border-bottom:2px solid var(--lime);color:var(--text)}.admin-heading-actions{display:flex;align-items:center;gap:10px}.admin-return-link{white-space:nowrap}@media(max-width:720px){.admin-heading-actions{align-items:flex-end;flex-direction:column;gap:8px}.admin-return-link{padding:8px 10px}}
 
 .example code{white-space:pre-wrap;overflow-wrap:anywhere}.admin-example-field textarea{width:100%}.admin-score-input{width:min(100%,180px);min-height:40px;padding:9px 11px;border:1px solid #343b4b;border-radius:5px;background:#11151e;color:var(--text);font:12px var(--sans)}.admin-score-input:focus{outline:1px solid var(--purple)}.admin-score-feedback{min-height:0;margin:4px 0}
+
+.auth-recovery-link{display:block;margin:12px auto 0}
+.account-dialog{width:min(100% - 32px,430px);padding:27px;border:1px solid #3a4252;border-radius:10px;background:#171b26;color:var(--text);box-shadow:0 24px 90px #080a1070}
+.account-dialog::backdrop{background:#080a10cc;backdrop-filter:blur(3px)}
+.account-dialog h2{margin:0;font-size:21px;letter-spacing:-.5px}
+.account-dialog form>p:not(.form-feedback){margin:7px 0 18px;color:#aeb5c5;font-size:12px}
+.account-dialog input{width:100%;min-height:42px;padding:9px 11px;border:1px solid #343b4b;border-radius:5px;background:#11151e;color:var(--text);font:13px var(--sans)}
+.account-dialog input:focus{outline:1px solid var(--purple)}
+.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}
+@media(max-width:720px){.account-dialog{padding:23px}.dialog-actions .button{flex:1}.account-actions{gap:7px}.account-actions #edit-profile-name{font-size:9px}}
