@@ -291,8 +291,10 @@ $$;
 
 alter table public.challenge_submissions enable row level security;
 revoke all on public.challenge_submissions from public, anon, authenticated;
-grant select, insert on public.challenge_submissions to authenticated;
-grant update (profile_id, challenge_id, answer, language) on public.challenge_submissions to authenticated;
+grant select on public.challenge_submissions to authenticated;
+grant insert (profile_id, challenge_id, answer, language) on public.challenge_submissions to authenticated;
+grant update (answer, language, status, review_feedback, reviewed_by, reviewed_at)
+  on public.challenge_submissions to authenticated;
 grant update (status, review_feedback, reviewed_by, reviewed_at) on public.challenge_submissions to authenticated;
 
 drop policy if exists "Owners can read their challenge submissions" on public.challenge_submissions;
@@ -455,11 +457,13 @@ revoke all on function private.sync_submission_leaderboard() from public, anon, 
 create or replace function private.reset_submission_review_on_edit()
 returns trigger
 language plpgsql
-security definer
 set search_path = pg_catalog, public
-as $$
+as $
 begin
-  if new.answer is distinct from old.answer or new.language is distinct from old.language then
+  if new.answer is distinct from old.answer
+     or new.language is distinct from old.language
+     or new.profile_id is distinct from old.profile_id
+     or new.challenge_id is distinct from old.challenge_id then
     new.status := 'pending';
     new.review_feedback := null;
     new.reviewed_by := null;
