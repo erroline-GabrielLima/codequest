@@ -9,6 +9,7 @@ if (config.url && config.publishableKey) {
   const challengeForm = document.querySelector('#admin-challenge-form');
   const challengeSelector = document.querySelector('#admin-challenge-selector');
   const reviewList = document.querySelector('#admin-review-list');
+  const reviewCount = document.querySelector('#admin-review-count');
   const accountSection = document.querySelector('#admin-access-management');
   let currentUser = null;
   let currentProfile = null;
@@ -407,6 +408,7 @@ if (config.url && config.publishableKey) {
       .limit(100);
 
     if (error) {
+      reviewCount.textContent = 'Erro ao carregar';
       reviewList.replaceChildren();
       const message = document.createElement('p');
       message.className = 'admin-error';
@@ -416,6 +418,8 @@ if (config.url && config.publishableKey) {
     }
 
     const submissions = data || [];
+    const pendingCount = submissions.filter((row) => row.status === 'pending').length;
+    reviewCount.textContent = pendingCount + (pendingCount === 1 ? ' pendente' : ' pendentes');
     reviewList.replaceChildren();
     if (submissions.length === 0) {
       const empty = document.createElement('div');
