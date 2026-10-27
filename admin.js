@@ -99,8 +99,8 @@ if (config.url && config.publishableKey) {
     document.querySelector('#challenge-title').textContent = 'Aguardando próximo desafio';
     document.querySelector('#challenge-description').textContent = 'Ainda não há um desafio publicado.';
     document.querySelector('#challenge-difficulty').textContent = 'EM BREVE';
-    document.querySelector('#challenge-example-input').textContent = '—';
-    document.querySelector('#challenge-example-output').textContent = '—';
+    document.querySelector('#challenge-example-text').textContent = '';
+    document.querySelector('#challenge-example').hidden = true;
     renderChallengeClock();
   }
 
@@ -150,7 +150,7 @@ if (config.url && config.publishableKey) {
   async function loadStudentChallenge() {
     const { data, error } = await supabase
       .from('challenges')
-      .select('id, title, description, difficulty, example_input, example_output, points, starts_at, ends_at, is_published')
+      .select('id, title, description, difficulty, example_text, points, starts_at, ends_at, is_published')
       .eq('is_published', true)
       .limit(100);
 
@@ -184,8 +184,9 @@ if (config.url && config.publishableKey) {
     document.querySelector('#challenge-title').textContent = currentChallenge.title;
     document.querySelector('#challenge-description').textContent = currentChallenge.description;
     document.querySelector('#challenge-difficulty').textContent = currentChallenge.difficulty;
-    document.querySelector('#challenge-example-input').textContent = currentChallenge.example_input;
-    document.querySelector('#challenge-example-output').textContent = currentChallenge.example_output;
+    const exampleText = String(currentChallenge.example_text || '').trim();
+    document.querySelector('#challenge-example-text').textContent = exampleText;
+    document.querySelector('#challenge-example').hidden = !exampleText;
     renderChallengeClock();
     await loadProfileSubmission();
   }
@@ -196,8 +197,7 @@ if (config.url && config.publishableKey) {
     document.querySelector('#admin-challenge-title').value = '';
     document.querySelector('#admin-challenge-description').value = '';
     document.querySelector('#admin-challenge-points').value = '10';
-    document.querySelector('#admin-example-input').value = '';
-    document.querySelector('#admin-example-output').value = '';
+    document.querySelector('#admin-example-text').value = '';
     document.querySelector('#admin-challenge-start').value = '';
     document.querySelector('#admin-challenge-end').value = '';
     document.querySelector('#admin-challenge-published').checked = true;
@@ -214,8 +214,7 @@ if (config.url && config.publishableKey) {
     document.querySelector('#admin-challenge-points').value = String(challenge.points ?? 10);
     document.querySelector('#admin-challenge-start').value = localDate(challenge.starts_at);
     document.querySelector('#admin-challenge-end').value = localDate(challenge.ends_at);
-    document.querySelector('#admin-example-input').value = challenge.example_input || '';
-    document.querySelector('#admin-example-output').value = challenge.example_output || '';
+    document.querySelector('#admin-example-text').value = challenge.example_text || '';
     document.querySelector('#admin-challenge-published').checked = Boolean(challenge.is_published);
     document.querySelector('#save-challenge-button').textContent = 'Salvar alterações';
   }
@@ -313,6 +312,21 @@ if (config.url && config.publishableKey) {
     answer.className = 'admin-review-answer';
     answer.textContent = submission.answer;
 
+    const scoreLabel = document.createElement('label');
+    scoreLabel.className = 'field-label';
+    scoreLabel.textContent = 'PONTOS DESTA RESPOSTA (0 A 1000)';
+    const scoreInput = document.createElement('input');
+    scoreInput.type = 'number';
+    scoreInput.min = '0';
+    scoreInput.max = '1000';
+    scoreInput.step = '1';
+    scoreInput.required = true;
+    scoreInput.className = 'admin-score-input';
+    scoreInput.value = String(submission.awarded_points ?? challenge?.points ?? 10);
+    const scoreFeedback = document.createElement('p');
+    scoreFeedback.className = 'form-feedback admin-score-feedback';
+    scoreFeedback.setAttribute('role', 'status');
+
     const feedbackLabel = document.createElement('label');
     feedbackLabel.className = 'field-label';
     feedbackLabel.textContent = 'COMENTÁRIO PARA O PARTICIPANTE';
@@ -326,7 +340,12 @@ if (config.url && config.publishableKey) {
     const approve = document.createElement('button');
     approve.type = 'button';
     approve.className = 'button button-primary';
-    approve.textContent = 'Aprovar · +' + (challenge?.points || 0) + ' pts';
+    const updateApproveLabel = () => {
+      approve.textContent = 'Aprovar · +' + (scoreInput.value.trim() || '0') + ' pts';
+    };
+    updateApproveLabel();
+    scoreInput.addEventListener('input', updateApproveLabel);
+
     const requestChanges = document.createElement('button');
     requestChanges.type = 'button';
     requestChanges.className = 'button button-secondary';
@@ -334,11 +353,22 @@ if (config.url && config.publishableKey) {
 
     async function review(status) {
       const comment = feedbackBox.value.trim();
+      const scoreText = scoreInput.value.trim();
+      const awardedPoints = Number(scoreText);
+      scoreFeedback.textContent = '';
+
       if (status === 'changes_requested' && !comment) {
         setFeedback(document.querySelector('#admin-role-label'), 'Escreva o que deve ser ajustado antes de pedir uma correção.', true);
         feedbackBox.focus();
         return;
       }
+      if (status === 'approved' && (!scoreText || !Number.isInteger(awardedPoints) || awardedPoints < 0 || awardedPoints > 1000)) {
+        scoreFeedback.textContent = 'Informe uma pontuação inteira entre 0 e 1000.';
+        scoreFeedback.classList.add('admin-error');
+        scoreInput.focus();
+        return;
+      }
+
       approve.disabled = true;
       requestChanges.disabled = true;
       const result = await supabase
@@ -348,6 +378,7 @@ if (config.url && config.publishableKey) {
           review_feedback: comment || null,
           reviewed_by: currentUser.id,
           reviewed_at: new Date().toISOString(),
+          awarded_points: status === 'approved' ? awardedPoints : null,
         })
         .eq('id', submission.id);
       if (result.error) {
@@ -364,14 +395,14 @@ if (config.url && config.publishableKey) {
     approve.addEventListener('click', () => review('approved'));
     requestChanges.addEventListener('click', () => review('changes_requested'));
     actions.append(approve, requestChanges);
-    card.append(header, answer, feedbackLabel, feedbackBox, actions);
+    card.append(header, answer, scoreLabel, scoreInput, scoreFeedback, feedbackLabel, feedbackBox, actions);
     return card;
   }
 
   async function loadReviewQueue() {
     const { data, error } = await supabase
       .from('challenge_submissions')
-      .select('id, profile_id, challenge_id, answer, language, submitted_at, status, review_feedback')
+      .select('id, profile_id, challenge_id, answer, language, submitted_at, status, review_feedback, awarded_points')
       .order('submitted_at', { ascending: false })
       .limit(100);
 
@@ -565,8 +596,9 @@ if (config.url && config.publishableKey) {
       points,
       starts_at: startsAt,
       ends_at: endsAt,
-      example_input: String(form.get('example_input') || '').trim(),
-      example_output: String(form.get('example_output') || '').trim(),
+      example_text: String(form.get('example_text') || '').trim(),
+      example_input: '',
+      example_output: '',
       is_published: document.querySelector('#admin-challenge-published').checked,
     };
 
