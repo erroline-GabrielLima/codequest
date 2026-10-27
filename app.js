@@ -150,6 +150,7 @@ async function fetchProfiles() {
   const { data, error } = await supabase
     .from('game_profiles')
     .select('id, name')
+    .eq('owner_id', currentUser.id)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
