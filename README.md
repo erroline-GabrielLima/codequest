@@ -15,7 +15,7 @@ O arquivo de configuração usa somente valores públicos. Nunca use a chave `se
 ## Funcionamento
 
 - Pessoas criam uma conta com e-mail e senha; o Supabase pode pedir confirmação do e-mail conforme as configurações do projeto.
-- Cada conta pode criar vários perfis e selecionar qual usar.
+- Cada conta possui um único perfil, criado automaticamente no primeiro acesso.
 - O desafio exibido é um exemplo inicial; respostas ficam como rascunhos locais neste MVP.
 - O placar comunitário ainda não compartilha resultados entre contas.
 - O site não executa código submetido.
