@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#10131c" />
     <meta name="description" content="Desafios semanais de programação para aprender construindo." />
     <title>CodeQuest — aprenda fazendo</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=admin-dashboard-20261027" />
   </head>
   <body>
     <section class="gate-screen" id="auth-screen" aria-labelledby="auth-title">
@@ -51,7 +51,7 @@
         <a class="nav-link active" href="#desafio">Desafio</a>
         <a class="nav-link" href="#envio">Meu envio</a>
         <a class="nav-link" href="#placar">Placar</a>
-        <a class="nav-link" id="admin-link" href="#admin-panel" hidden>Admin</a>
+        <a class="nav-link" id="admin-link" href="#admin-panel" aria-current="page" hidden>Admin</a>
       </nav>
       <div class="account-actions"><div class="active-profile" id="active-profile" role="status" aria-label="Perfil da conta"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></div><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
     </header>
@@ -99,7 +99,7 @@
         <aside class="side-note"><span class="note-icon">✦</span><p><strong>Feito é melhor que perfeito.</strong><br />Escolha seu perfil e comece pelo desafio inicial.</p></aside>
       </div>
           <section class="admin-panel" id="admin-panel" hidden aria-labelledby="admin-title">
-        <div class="admin-heading"><div><p class="eyebrow">ACESSO RESTRITO</p><h2 id="admin-title">Painel do projeto</h2></div><span class="participants" id="admin-role-label">ADMIN</span></div>
+        <div class="admin-heading"><div><p class="eyebrow">ACESSO RESTRITO</p><h2 id="admin-title">Dashboard administrativo</h2></div><div class="admin-heading-actions"><span class="participants" id="admin-role-label">ADMIN</span><a class="button button-secondary admin-return-link" href="#desafio">Voltar ao desafio</a></div></div>
         <p class="admin-intro">Gerencie desafios, prazos e revisão de respostas. As respostas só pontuam após aprovação.</p>
         <section class="panel admin-access" id="admin-access-management" hidden>
           <div class="section-heading"><div><p class="eyebrow">EQUIPE</p><h3>Acessos administrativos</h3></div></div>
@@ -140,8 +140,8 @@
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>FEITO PARA APRENDER, UM DESAFIO POR VEZ.</span></footer>
     <script src="supabase-config.js"></script>
-    <script type="module" src="app.js?v=single-profile-admin-fix-20261027"></script>
-    <script type="module" src="admin.js?v=single-profile-admin-fix-20261027"></script>
+    <script type="module" src="app.js?v=admin-dashboard-20261027"></script>
+    <script type="module" src="admin.js?v=admin-dashboard-20261027"></script>
     </div>
   </body>
 </html>
