@@ -28,6 +28,7 @@
           <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Pelo menos 8 caracteres" required />
           <button class="button button-primary auth-submit" id="auth-submit" type="submit">Entrar <span aria-hidden="true">↗</span></button>
         </form>
+        <button class="text-button auth-recovery-link" id="forgot-password-button" type="button">Esqueci minha senha</button>
         <p class="gate-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
         <p class="gate-footnote">Suas credenciais são protegidas pelo serviço de autenticação.</p>
         <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p></section>
@@ -53,7 +54,7 @@
         <a class="nav-link" href="#placar">Placar</a>
         <a class="nav-link" id="admin-link" href="#admin-panel" aria-current="page" hidden>Admin</a>
       </nav>
-      <div class="account-actions"><div class="active-profile" id="active-profile" role="status" aria-label="Perfil da conta"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></div><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
+      <div class="account-actions"><div class="active-profile" id="active-profile"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span></div><button class="text-button compact" id="edit-profile-name" type="button">Editar nome</button><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
     </header>
 
     <main id="inicio">
@@ -97,7 +98,7 @@
         <p class="admin-intro">Gerencie desafios, prazos e revisão de respostas. As respostas só pontuam após aprovação.</p>
         <section class="panel admin-access" id="admin-access-management" hidden>
           <div class="section-heading"><div><p class="eyebrow">EQUIPE</p><h3>Acessos administrativos</h3></div></div>
-          <p class="admin-help">Escolha um perfil de uma conta já cadastrada para dar acesso de educador.</p>
+          <p class="admin-help">Sua conta já aparece na lista abaixo. O seletor mostra contas sem acesso administrativo; confira o ID curto com a pessoa antes de adicioná-la.</p>
           <div class="admin-inline-form"><select id="admin-user-selector" aria-label="Conta para adicionar como educador"></select><button class="button button-primary" id="add-educator-button" type="button">Adicionar educador</button></div>
           <div id="admin-account-list" class="admin-account-list" aria-live="polite"></div>
           <p class="form-feedback" id="admin-account-feedback" role="status" aria-live="polite"></p>
@@ -134,8 +135,28 @@
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>CODEQUEST · DESAFIOS DE PROGRAMAÇÃO</span></footer>
     <script src="supabase-config.js"></script>
-    <script type="module" src="app.js?v=submission-permissions-20261027"></script>
+    <script type="module" src="app.js?v=profile-recovery-20261027"></script>
     <script type="module" src="admin.js?v=manual-awards-flex-example-20261027"></script>
     </div>
+    <dialog class="account-dialog" id="profile-name-dialog" aria-labelledby="profile-name-title">
+      <form id="profile-name-form">
+        <h2 id="profile-name-title">Editar nome do perfil</h2>
+        <p>Esse nome aparece no CodeQuest e no placar.</p>
+        <label class="field-label" for="profile-name-input">NOME DO PERFIL</label>
+        <input id="profile-name-input" type="text" maxlength="32" autocomplete="nickname" required />
+        <p class="form-feedback" id="profile-name-feedback" role="status" aria-live="polite"></p>
+        <div class="dialog-actions"><button class="button button-secondary" id="cancel-profile-name" type="button">Cancelar</button><button class="button button-primary" id="save-profile-name" type="submit">Salvar nome</button></div>
+      </form>
+    </dialog>
+    <dialog class="account-dialog" id="password-recovery-dialog" aria-labelledby="password-recovery-title">
+      <form id="password-recovery-form">
+        <h2 id="password-recovery-title">Escolha uma senha nova</h2>
+        <p>Digite a nova senha para voltar à sua conta.</p>
+        <label class="field-label" for="new-password">NOVA SENHA</label>
+        <input id="new-password" type="password" autocomplete="new-password" minlength="8" required />
+        <p class="form-feedback" id="password-recovery-feedback" role="status" aria-live="polite"></p>
+        <div class="dialog-actions"><button class="button button-secondary" id="cancel-password-recovery" type="button">Cancelar</button><button class="button button-primary" id="save-new-password" type="submit">Salvar senha</button></div>
+      </form>
+    </dialog>
   </body>
 </html>
