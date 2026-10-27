@@ -568,3 +568,29 @@ begin
   end loop;
 end
 $$;
+
+
+-- Keep the public leaderboard name in sync when a player changes their profile name.
+create or replace function private.sync_profile_name_to_leaderboard()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $$
+begin
+  update public.challenge_leaderboard
+  set profile_name = new.name
+  where profile_id = new.id;
+
+  return new;
+end;
+$$;
+
+revoke all on function private.sync_profile_name_to_leaderboard() from public, anon, authenticated;
+
+drop trigger if exists sync_profile_name_to_leaderboard on public.game_profiles;
+create trigger sync_profile_name_to_leaderboard
+  after update of name on public.game_profiles
+  for each row
+  when (old.name is distinct from new.name)
+  execute function private.sync_profile_name_to_leaderboard();
