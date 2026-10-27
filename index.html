@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#10131c" />
     <meta name="description" content="Desafios semanais de programação para aprender construindo." />
     <title>CodeQuest — aprenda fazendo</title>
-    <link rel="stylesheet" href="styles.css?v=human-style-20261027" />
+    <link rel="stylesheet" href="styles.css?v=account-controls-20261027" />
   </head>
   <body>
     <section class="gate-screen" id="auth-screen" aria-labelledby="auth-title">
@@ -82,7 +82,7 @@
           <select id="language" name="language"><option>JavaScript</option><option>Python</option><option>Java</option><option>C</option><option>Outra</option></select>
           <label class="field-label" for="solution">LINK OU DESCRIÇÃO DA SOLUÇÃO</label>
           <textarea id="solution" name="solution" rows="4" maxlength="20000" placeholder="Cole o link do seu código ou conte como resolveu..."></textarea>
-          <div class="form-footer"><span class="local-note">Seu envio ficará salvo na sua conta.</span><button class="button button-primary" id="submit-button" type="button">Enviar solução <span aria-hidden="true">↗</span></button></div>
+          <div class="form-footer"><span class="local-note">O rascunho fica neste navegador até o envio.</span><button class="button button-primary" id="submit-button" type="button">Enviar solução <span aria-hidden="true">↗</span></button></div>
           <p class="form-feedback" id="feedback" role="status" aria-live="polite"></p>
         </section>
 
@@ -128,15 +128,15 @@
           <div id="admin-challenge-list" class="admin-challenge-list" aria-live="polite"></div>
         </section>
         <section class="panel admin-reviews">
-          <div class="section-heading"><div><p class="eyebrow">RESPOSTAS</p><h3>Fila de revisão</h3></div><button class="button button-secondary" id="refresh-reviews-button" type="button">Atualizar</button></div>
+          <div class="section-heading"><div><p class="eyebrow">RESPOSTAS</p><h3>Fila de revisão</h3></div><div class="admin-review-tools"><span class="participants" id="admin-review-count">CARREGANDO</span><button class="button button-secondary" id="refresh-reviews-button" type="button">Atualizar</button></div></div>
           <div id="admin-review-list" class="admin-review-list" aria-live="polite"><div class="leaderboard-empty"><div><strong>Carregando respostas…</strong></div></div></div>
         </section>
       </section>
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>CODEQUEST · DESAFIOS DE PROGRAMAÇÃO</span></footer>
     <script src="supabase-config.js"></script>
-    <script type="module" src="app.js?v=profile-recovery-20261027"></script>
-    <script type="module" src="admin.js?v=manual-awards-flex-example-20261027"></script>
+    <script type="module" src="app.js?v=account-recovery-draft-20261027"></script>
+    <script type="module" src="admin.js?v=account-controls-20261027"></script>
     </div>
     <dialog class="account-dialog" id="profile-name-dialog" aria-labelledby="profile-name-title">
       <form id="profile-name-form">
