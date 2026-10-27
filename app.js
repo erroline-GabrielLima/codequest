@@ -91,36 +91,29 @@ function drawLeaderboard(entries) {
     if (!target.list || !target.count) continue;
     target.count.textContent = entries.length + (entries.length === 1 ? ' PARTICIPANTE' : ' PARTICIPANTES');
     target.list.replaceChildren();
-
     if (entries.length === 0) {
-      renderLeaderboardState(target.list, 'Aguardando os primeiros participantes');
+      renderLeaderboardState(target.list, 'Aguardando respostas aprovadas');
       continue;
     }
-
     entries.forEach((entry, index) => {
       const row = document.createElement('div');
       row.className = 'leaderboard-row';
-
       const rank = document.createElement('span');
       rank.className = 'rank';
       rank.textContent = String(index + 1).padStart(2, '0');
-
       const avatar = document.createElement('span');
       avatar.className = 'avatar avatar-green';
       avatar.textContent = initials(entry.profile_name);
-
       const name = document.createElement('span');
       name.className = 'player-name';
       name.textContent = entry.profile_name;
-
       const score = document.createElement('span');
       score.className = 'score';
       const total = document.createElement('span');
-      total.textContent = String(entry.submissions_count);
+      total.textContent = String(entry.points);
       const label = document.createElement('small');
-      label.textContent = entry.submissions_count === 1 ? ' envio' : ' envios';
+      label.textContent = ' pts';
       score.append(total, label);
-
       row.append(rank, avatar, name, score);
       target.list.append(row);
     });
@@ -138,8 +131,8 @@ async function loadLeaderboard() {
   try {
     const { data, error } = await supabase
       .from('challenge_leaderboard')
-      .select('profile_name, submissions_count, last_submitted_at')
-      .order('submissions_count', { ascending: false })
+      .select('profile_name, points, approved_count, last_submitted_at')
+      .order('points', { ascending: false })
       .order('last_submitted_at', { ascending: true })
       .limit(50);
 
@@ -232,10 +225,11 @@ async function activateProfile(profile) {
   selectedProfileLabel.textContent = profile.name;
   selectedProfileAvatar.textContent = initials(profile.name);
 
+  const challengeId = window.CODEQUEST_ACTIVE_CHALLENGE_ID || 'week-01';
+  const savedDraft = localStorage.getItem('codequest-' + challengeId + '-' + profile.id);
   const answerField = document.querySelector('#solution');
   const languageField = document.querySelector('#language');
   const feedback = document.querySelector('#feedback');
-  const savedDraft = localStorage.getItem('codequest-week-01-' + profile.id);
 
   if (savedDraft) {
     try {
@@ -244,42 +238,19 @@ async function activateProfile(profile) {
       languageField.value = draft.language || 'JavaScript';
     } catch {
       answerField.value = '';
+      languageField.value = 'JavaScript';
     }
   } else {
     answerField.value = '';
     languageField.value = 'JavaScript';
   }
 
-  showScreen('app');
-  feedback.textContent = 'Carregando envio salvo…';
+  feedback.textContent = '';
   feedback.style.color = '';
-
-  try {
-    const { data, error } = await supabase
-      .from('challenge_submissions')
-      .select('answer, language')
-      .eq('profile_id', profile.id)
-      .eq('challenge_id', 'week-01')
-      .maybeSingle();
-
-    if (currentProfile?.id !== profile.id) return;
-    if (error) throw error;
-    if (data) {
-      answerField.value = data.answer;
-      languageField.value = data.language;
-      localStorage.setItem('codequest-week-01-' + profile.id, JSON.stringify({
-        answer: data.answer,
-        language: data.language,
-        savedAt: new Date().toISOString(),
-      }));
-    }
-    feedback.textContent = '';
-  } catch {
-    if (currentProfile?.id === profile.id) {
-      feedback.textContent = 'Não foi possível carregar o envio salvo. Seu rascunho continua disponível.';
-      feedback.style.color = '#ff9e9e';
-    }
-  }
+  showScreen('app');
+  window.dispatchEvent(new CustomEvent('codequest:profile-selected', {
+    detail: { profile, user: currentUser },
+  }));
 }
 
 async function signOut() {
@@ -360,26 +331,31 @@ document.querySelector('#submit-button').addEventListener('click', async () => {
   const feedback = document.querySelector('#feedback');
   const submitButton = document.querySelector('#submit-button');
   const answer = answerField.value.trim();
+  const challengeId = window.CODEQUEST_ACTIVE_CHALLENGE_ID;
+  const challengeOpen = window.CODEQUEST_CHALLENGE_OPEN !== false;
 
   if (!answer) {
     feedback.textContent = 'Escreva sua solução antes de enviar.';
     answerField.focus();
     return;
   }
-
   if (!currentUser || !currentProfile) {
     feedback.textContent = 'Entre e escolha um perfil para enviar sua solução.';
     feedback.style.color = '#ff9e9e';
     return;
   }
+  if (!challengeId || !challengeOpen) {
+    feedback.textContent = 'Este desafio ainda não abriu ou o prazo já terminou.';
+    feedback.style.color = '#ff9e9e';
+    return;
+  }
 
-  const draftKey = 'codequest-week-01-' + currentProfile.id;
+  const draftKey = 'codequest-' + challengeId + '-' + currentProfile.id;
   localStorage.setItem(draftKey, JSON.stringify({
     answer,
     language: languageField.value,
     savedAt: new Date().toISOString(),
   }));
-
   submitButton.disabled = true;
   feedback.style.color = '';
   feedback.textContent = 'Enviando sua solução…';
@@ -389,13 +365,12 @@ document.querySelector('#submit-button').addEventListener('click', async () => {
       .from('challenge_submissions')
       .upsert({
         profile_id: currentProfile.id,
-        challenge_id: 'week-01',
+        challenge_id: challengeId,
         answer,
         language: languageField.value,
       }, { onConflict: 'profile_id,challenge_id' });
-
     if (error) throw error;
-    feedback.textContent = 'Envio registrado. O placar conta desafios enviados; as respostas não são avaliadas automaticamente.';
+    feedback.textContent = 'Resposta enviada e aguardando revisão. O placar soma pontos após aprovação.';
     await loadLeaderboard();
   } catch (error) {
     feedback.textContent = 'Não foi possível enviar agora. Seu rascunho continua salvo. ' + (error.message || 'Tente novamente.');
