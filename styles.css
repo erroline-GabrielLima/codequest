@@ -24,3 +24,5 @@
 .account-dialog input:focus{outline:1px solid var(--purple)}
 .dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:17px}
 @media(max-width:720px){.account-dialog{padding:23px}.dialog-actions .button{flex:1}.account-actions{gap:7px}.account-actions #edit-profile-name{font-size:9px}}
+
+.admin-review-tools{display:flex;align-items:center;gap:9px}
