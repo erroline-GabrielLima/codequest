@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#10131c" />
     <meta name="description" content="Desafios semanais de programação para aprender construindo." />
     <title>CodeQuest — aprenda fazendo</title>
-    <link rel="stylesheet" href="styles.css?v=admin-dashboard-20261027" />
+    <link rel="stylesheet" href="styles.css?v=manual-awards-flex-example-20261027" />
   </head>
   <body>
     <section class="gate-screen" id="auth-screen" aria-labelledby="auth-title">
@@ -30,7 +30,7 @@
         </form>
         <p class="gate-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
         <p class="gate-footnote">Suas credenciais são protegidas pelo serviço de autenticação.</p>
-        <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p></section>
+        <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p></section>
       </div>
     </section>
 
@@ -67,7 +67,7 @@
         <div class="hero-art" aria-hidden="true">
           <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
           <div class="quest-card"><span class="quest-symbol">{ }</span><span class="quest-card-label">QUEST<br />01</span></div>
-          <span class="spark spark-one">✳</span><span class="spark spark-two">✦</span>
+          
         </div>
         <div class="hero-footer"><span id="challenge-publication-state">DESAFIO</span><span class="countdown" id="challenge-countdown">CARREGANDO</span></div>
       </section>
@@ -76,7 +76,7 @@
         <section class="panel challenge-panel">
           <div class="section-heading"><div><p class="eyebrow">DESAFIO DE EXEMPLO</p><h2 id="challenge-title">O primeiro passo</h2></div><span class="difficulty" id="challenge-difficulty">INICIANTE</span></div>
           <p class="challenge-text" id="challenge-description">Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.</p>
-          <div class="example"><span class="example-label">EXEMPLO</span><code>Entrada: <b id="challenge-example-input">"Lia"</b><br />Saída: <b id="challenge-example-output">"Olá, Lia!"</b></code></div>
+          <div class="example" id="challenge-example" hidden><span class="example-label">EXEMPLO</span><code id="challenge-example-text"></code></div>
           <div class="challenge-meta"><span id="challenge-window-label">Sem prazo definido</span><span id="challenge-time-state">Disponível</span></div>
         </section>
 
@@ -92,11 +92,11 @@
 
         <section class="panel leaderboard-panel" id="placar">
           <div class="section-heading"><div><p class="eyebrow">PLACAR</p><h2>Placar geral</h2></div><span class="participants" id="leaderboard-count">CARREGANDO</span></div>
-          <div id="leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div>
+          <div id="leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><div><strong>Carregando placar…</strong></div></div></div>
           <p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p>
         </section>
 
-        <aside class="side-note"><span class="note-icon">✦</span><p><strong>Feito é melhor que perfeito.</strong><br />Escolha seu perfil e comece pelo desafio inicial.</p></aside>
+        <aside class="side-note"><p><strong>Feito é melhor que perfeito.</strong><br />Escolha seu perfil e comece pelo desafio inicial.</p></aside>
       </div>
           <section class="admin-panel" id="admin-panel" hidden aria-labelledby="admin-title">
         <div class="admin-heading"><div><p class="eyebrow">ACESSO RESTRITO</p><h2 id="admin-title">Dashboard administrativo</h2></div><div class="admin-heading-actions"><span class="participants" id="admin-role-label">ADMIN</span><a class="button button-secondary admin-return-link" href="#desafio">Voltar ao desafio</a></div></div>
@@ -123,9 +123,9 @@
               <div><label class="field-label" for="admin-challenge-start">ABRE EM</label><input id="admin-challenge-start" name="starts_at" type="datetime-local" /></div>
               <div><label class="field-label" for="admin-challenge-end">PRAZO FINAL</label><input id="admin-challenge-end" name="ends_at" type="datetime-local" /></div>
             </div>
-            <div class="admin-form-grid examples-grid">
-              <div><label class="field-label" for="admin-example-input">EXEMPLO DE ENTRADA</label><input id="admin-example-input" name="example_input" maxlength="500" /></div>
-              <div><label class="field-label" for="admin-example-output">EXEMPLO DE SAÍDA</label><input id="admin-example-output" name="example_output" maxlength="500" /></div>
+            <div class="admin-example-field">
+              <label class="field-label" for="admin-example-text">EXEMPLO LIVRE (OPCIONAL)</label>
+              <textarea id="admin-example-text" name="example_text" rows="4" maxlength="2000" placeholder="Escreva um exemplo no formato que fizer sentido para este desafio, ou deixe vazio."></textarea>
             </div>
             <label class="admin-checkbox"><input id="admin-challenge-published" name="is_published" type="checkbox" checked /> Publicado para os participantes</label>
             <div class="admin-form-actions"><button class="button button-primary" id="save-challenge-button" type="submit">Salvar desafio</button><span class="form-feedback" id="challenge-feedback" role="status" aria-live="polite"></span></div>
@@ -134,14 +134,14 @@
         </section>
         <section class="panel admin-reviews">
           <div class="section-heading"><div><p class="eyebrow">RESPOSTAS</p><h3>Fila de revisão</h3></div><button class="button button-secondary" id="refresh-reviews-button" type="button">Atualizar</button></div>
-          <div id="admin-review-list" class="admin-review-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando respostas…</strong></div></div></div>
+          <div id="admin-review-list" class="admin-review-list" aria-live="polite"><div class="leaderboard-empty"><div><strong>Carregando respostas…</strong></div></div></div>
         </section>
       </section>
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>FEITO PARA APRENDER, UM DESAFIO POR VEZ.</span></footer>
     <script src="supabase-config.js"></script>
-    <script type="module" src="app.js?v=admin-dashboard-20261027"></script>
-    <script type="module" src="admin.js?v=admin-dashboard-20261027"></script>
+    <script type="module" src="app.js?v=manual-awards-flex-example-20261027"></script>
+    <script type="module" src="admin.js?v=manual-awards-flex-example-20261027"></script>
     </div>
   </body>
 </html>
