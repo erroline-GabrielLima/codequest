@@ -66,15 +66,11 @@ function renderLeaderboardState(container, message) {
   container.replaceChildren();
   const empty = document.createElement('div');
   empty.className = 'leaderboard-empty';
-  const icon = document.createElement('span');
-  icon.className = 'note-icon';
-  icon.setAttribute('aria-hidden', 'true');
-  icon.textContent = '✦';
   const copy = document.createElement('div');
   const title = document.createElement('strong');
   title.textContent = message;
   copy.append(title);
-  empty.append(icon, copy);
+  empty.append(copy);
   container.append(empty);
 }
 
