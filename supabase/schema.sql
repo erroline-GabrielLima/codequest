@@ -480,19 +480,37 @@ revoke all on function private.sync_submission_leaderboard() from public, anon, 
 create or replace function private.reset_submission_review_on_edit()
 returns trigger
 language plpgsql
+security definer
 set search_path = pg_catalog, public
-as $
+as $$
+declare
+  answer_changed boolean;
+  review_changed boolean;
 begin
-  if new.answer is distinct from old.answer
-     or new.language is distinct from old.language
-     or new.profile_id is distinct from old.profile_id
-     or new.challenge_id is distinct from old.challenge_id then
+  answer_changed := new.answer is distinct from old.answer
+    or new.language is distinct from old.language;
+  review_changed := new.status is distinct from old.status
+    or new.review_feedback is distinct from old.review_feedback
+    or new.reviewed_by is distinct from old.reviewed_by
+    or new.reviewed_at is distinct from old.reviewed_at
+    or new.awarded_points is distinct from old.awarded_points;
+
+  if private.current_project_role() is null then
+    if answer_changed or review_changed then
+      new.status := 'pending';
+      new.review_feedback := null;
+      new.reviewed_by := null;
+      new.reviewed_at := null;
+      new.awarded_points := null;
+    end if;
+  elsif answer_changed then
     new.status := 'pending';
     new.review_feedback := null;
     new.reviewed_by := null;
     new.reviewed_at := null;
     new.awarded_points := null;
   end if;
+
   return new;
 end;
 $$;
