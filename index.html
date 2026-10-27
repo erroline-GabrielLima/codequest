@@ -30,7 +30,7 @@
         </form>
         <p class="gate-feedback" id="auth-feedback" role="status" aria-live="polite"></p>
         <p class="gate-footnote">Suas credenciais são protegidas pelo serviço de autenticação.</p>
-        <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Ordenado por desafios enviados. As soluções ainda não são avaliadas automaticamente.</p></section>
+        <section class="public-leaderboard" aria-labelledby="auth-leaderboard-title"><div class="public-leaderboard-heading"><strong id="auth-leaderboard-title">PLACAR DA COMUNIDADE</strong><span class="participants" id="auth-leaderboard-count">CARREGANDO</span></div><div id="auth-leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div><p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p></section>
       </div>
     </section>
 
@@ -56,6 +56,7 @@
         <a class="nav-link active" href="#desafio">Desafio</a>
         <a class="nav-link" href="#envio">Meu envio</a>
         <a class="nav-link" href="#placar">Placar</a>
+        <a class="nav-link" id="admin-link" href="#admin-panel" hidden>Admin</a>
       </nav>
       <div class="account-actions"><button class="active-profile" id="active-profile" type="button" aria-label="Trocar perfil"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></button><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
     </header>
@@ -73,15 +74,15 @@
           <div class="quest-card"><span class="quest-symbol">{ }</span><span class="quest-card-label">QUEST<br />01</span></div>
           <span class="spark spark-one">✳</span><span class="spark spark-two">✦</span>
         </div>
-        <div class="hero-footer"><span>MISSÃO DE EXEMPLO</span><span class="countdown">SEM PRAZO DEFINIDO</span></div>
+        <div class="hero-footer"><span id="challenge-publication-state">DESAFIO</span><span class="countdown" id="challenge-countdown">CARREGANDO</span></div>
       </section>
 
       <div class="content-grid">
         <section class="panel challenge-panel">
-          <div class="section-heading"><div><p class="eyebrow">DESAFIO DE EXEMPLO</p><h2>O primeiro passo</h2></div><span class="difficulty">INICIANTE</span></div>
-          <p class="challenge-text">Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.</p>
-          <div class="example"><span class="example-label">EXEMPLO</span><code>Entrada: <b>"Lia"</b><br />Saída: <b>"Olá, Lia!"</b></code></div>
-          <div class="challenge-meta"><span>◷ &nbsp; 15–30 min</span><span>◎ &nbsp; Lógica básica</span></div>
+          <div class="section-heading"><div><p class="eyebrow">DESAFIO DE EXEMPLO</p><h2 id="challenge-title">O primeiro passo</h2></div><span class="difficulty" id="challenge-difficulty">INICIANTE</span></div>
+          <p class="challenge-text" id="challenge-description">Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.</p>
+          <div class="example"><span class="example-label">EXEMPLO</span><code>Entrada: <b id="challenge-example-input">"Lia"</b><br />Saída: <b id="challenge-example-output">"Olá, Lia!"</b></code></div>
+          <div class="challenge-meta"><span id="challenge-window-label">Sem prazo definido</span><span id="challenge-time-state">Disponível</span></div>
         </section>
 
         <section class="panel submit-panel" id="envio">
@@ -97,15 +98,55 @@
         <section class="panel leaderboard-panel" id="placar">
           <div class="section-heading"><div><p class="eyebrow">PLACAR</p><h2>Placar geral</h2></div><span class="participants" id="leaderboard-count">CARREGANDO</span></div>
           <div id="leaderboard-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando placar…</strong></div></div></div>
-          <p class="leaderboard-note">Ordenado por desafios enviados. As soluções ainda não são avaliadas automaticamente.</p>
+          <p class="leaderboard-note">Pontos entram no placar após revisão e aprovação de um administrador.</p>
         </section>
 
         <aside class="side-note"><span class="note-icon">✦</span><p><strong>Feito é melhor que perfeito.</strong><br />Escolha seu perfil e comece pelo desafio inicial.</p></aside>
       </div>
+          <section class="admin-panel" id="admin-panel" hidden aria-labelledby="admin-title">
+        <div class="admin-heading"><div><p class="eyebrow">ACESSO RESTRITO</p><h2 id="admin-title">Painel do projeto</h2></div><span class="participants" id="admin-role-label">ADMIN</span></div>
+        <p class="admin-intro">Gerencie desafios, prazos e revisão de respostas. As respostas só pontuam após aprovação.</p>
+        <section class="panel admin-access" id="admin-access-management" hidden>
+          <div class="section-heading"><div><p class="eyebrow">EQUIPE</p><h3>Acessos administrativos</h3></div></div>
+          <p class="admin-help">Escolha um perfil de uma conta já cadastrada para dar acesso de educador.</p>
+          <div class="admin-inline-form"><select id="admin-user-selector" aria-label="Conta para adicionar como educador"></select><button class="button button-primary" id="add-educator-button" type="button">Adicionar educador</button></div>
+          <div id="admin-account-list" class="admin-account-list" aria-live="polite"></div>
+          <p class="form-feedback" id="admin-account-feedback" role="status" aria-live="polite"></p>
+        </section>
+        <section class="panel admin-challenges">
+          <div class="section-heading"><div><p class="eyebrow">DESAFIOS</p><h3>Criar ou editar desafio</h3></div><button class="button button-secondary" id="new-challenge-button" type="button">Novo desafio</button></div>
+          <label class="field-label" for="admin-challenge-selector">DESAFIO PARA EDITAR</label>
+          <select id="admin-challenge-selector"></select>
+          <form id="admin-challenge-form">
+            <label class="field-label" for="admin-challenge-title">TÍTULO</label>
+            <input id="admin-challenge-title" name="title" maxlength="100" required />
+            <label class="field-label" for="admin-challenge-description">ENUNCIADO</label>
+            <textarea id="admin-challenge-description" name="description" rows="4" maxlength="5000" required></textarea>
+            <div class="admin-form-grid">
+              <div><label class="field-label" for="admin-challenge-difficulty">NÍVEL</label><select id="admin-challenge-difficulty" name="difficulty"><option>INICIANTE</option><option>INTERMEDIÁRIO</option><option>AVANÇADO</option></select></div>
+              <div><label class="field-label" for="admin-challenge-points">PONTOS</label><input id="admin-challenge-points" name="points" type="number" min="0" max="1000" value="10" required /></div>
+              <div><label class="field-label" for="admin-challenge-start">ABRE EM</label><input id="admin-challenge-start" name="starts_at" type="datetime-local" /></div>
+              <div><label class="field-label" for="admin-challenge-end">PRAZO FINAL</label><input id="admin-challenge-end" name="ends_at" type="datetime-local" /></div>
+            </div>
+            <div class="admin-form-grid examples-grid">
+              <div><label class="field-label" for="admin-example-input">EXEMPLO DE ENTRADA</label><input id="admin-example-input" name="example_input" maxlength="500" /></div>
+              <div><label class="field-label" for="admin-example-output">EXEMPLO DE SAÍDA</label><input id="admin-example-output" name="example_output" maxlength="500" /></div>
+            </div>
+            <label class="admin-checkbox"><input id="admin-challenge-published" name="is_published" type="checkbox" checked /> Publicado para os participantes</label>
+            <div class="admin-form-actions"><button class="button button-primary" id="save-challenge-button" type="submit">Salvar desafio</button><span class="form-feedback" id="challenge-feedback" role="status" aria-live="polite"></span></div>
+          </form>
+          <div id="admin-challenge-list" class="admin-challenge-list" aria-live="polite"></div>
+        </section>
+        <section class="panel admin-reviews">
+          <div class="section-heading"><div><p class="eyebrow">RESPOSTAS</p><h3>Fila de revisão</h3></div><button class="button button-secondary" id="refresh-reviews-button" type="button">Atualizar</button></div>
+          <div id="admin-review-list" class="admin-review-list" aria-live="polite"><div class="leaderboard-empty"><span class="note-icon" aria-hidden="true">✦</span><div><strong>Carregando respostas…</strong></div></div></div>
+        </section>
+      </section>
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>FEITO PARA APRENDER, UM DESAFIO POR VEZ.</span></footer>
     <script src="supabase-config.js"></script>
     <script type="module" src="app.js"></script>
+    <script type="module" src="admin.js"></script>
     </div>
   </body>
 </html>
