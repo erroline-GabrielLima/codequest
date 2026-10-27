@@ -10,9 +10,6 @@ const loginTab = document.querySelector('#login-tab');
 const signupTab = document.querySelector('#signup-tab');
 const nameField = document.querySelector('#auth-name');
 const authSubmit = document.querySelector('#auth-submit');
-const profileList = document.querySelector('#profile-list');
-const profileForm = document.querySelector('#profile-form');
-const profileNameField = document.querySelector('#profile-name');
 const selectedProfileLabel = document.querySelector('#profile-label');
 const selectedProfileAvatar = document.querySelector('#profile-avatar');
 
@@ -173,50 +170,24 @@ async function insertProfile(name) {
   return data;
 }
 
-function drawProfiles(profiles) {
-  profileList.replaceChildren();
-  for (const profile of profiles) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'profile-option';
-    button.setAttribute('aria-label', `Entrar como ${profile.name}`);
-
-    const avatar = document.createElement('span');
-    avatar.className = 'profile avatar avatar-green';
-    avatar.textContent = initials(profile.name);
-
-    const name = document.createElement('span');
-    name.className = 'profile-option-name';
-    name.textContent = profile.name;
-
-    button.append(avatar, name);
-    button.addEventListener('click', () => activateProfile(profile));
-    profileList.append(button);
-  }
-}
-
-async function openProfilePicker(restoreLastProfile = true) {
+async function openProfilePicker() {
   showScreen('profiles');
-  showProfileMessage('Carregando perfis…');
+  showProfileMessage('Preparando seu perfil…');
 
   try {
     let profiles = await fetchProfiles();
-    if (profiles.length === 0) {
+    let profile = profiles[0];
+
+    if (!profile) {
       const preferredName = currentUser.user_metadata?.display_name
         || currentUser.email?.split('@')[0]
         || 'Meu perfil';
-      profiles = [await insertProfile(preferredName.slice(0, 32))];
+      profile = await insertProfile(preferredName.slice(0, 32));
     }
 
-    drawProfiles(profiles);
-    showProfileMessage('');
-    if (restoreLastProfile) {
-      const savedProfileId = localStorage.getItem(`codequest-profile-${currentUser.id}`);
-      const savedProfile = profiles.find((profile) => profile.id === savedProfileId);
-      if (savedProfile) activateProfile(savedProfile);
-    }
+    await activateProfile(profile);
   } catch (error) {
-    showProfileMessage(error.message || 'Não foi possível carregar os perfis.', true);
+    showProfileMessage(error.message || 'Não foi possível carregar seu perfil.', true);
   }
 }
 
@@ -302,27 +273,6 @@ authForm.addEventListener('submit', async (event) => {
   }
 });
 
-profileForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const submitButton = profileForm.querySelector('button[type="submit"]');
-  submitButton.disabled = true;
-  showProfileMessage('Criando perfil…');
-
-  try {
-    const profile = await insertProfile(profileNameField.value);
-    profileNameField.value = '';
-    const profiles = await fetchProfiles();
-    drawProfiles(profiles);
-    showProfileMessage('');
-    activateProfile(profile);
-  } catch (error) {
-    showProfileMessage(error.message || 'Não foi possível criar o perfil.', true);
-  } finally {
-    submitButton.disabled = false;
-  }
-});
-
-document.querySelector('#active-profile').addEventListener('click', () => openProfilePicker(false));
 document.querySelector('#logout-button').addEventListener('click', signOut);
 document.querySelector('#header-logout').addEventListener('click', signOut);
 
