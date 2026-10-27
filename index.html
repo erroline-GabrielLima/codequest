@@ -39,13 +39,8 @@
         <a class="brand gate-brand" href="#inicio"><span class="brand-mark">&lt;/&gt;</span> codequest</a>
         <p class="eyebrow">CONTA CONECTADA</p>
         <h1 id="profile-title">Quem vai<br /><span>jogar hoje?</span></h1>
-        <div class="profile-list" id="profile-list" aria-live="polite"></div>
-        <form class="new-profile-form" id="profile-form">
-          <label class="field-label" for="profile-name">CRIAR NOVO PERFIL</label>
-          <div class="profile-create-row"><input id="profile-name" name="profileName" maxlength="32" placeholder="Nome do perfil" required /><button class="button button-primary" type="submit" aria-label="Criar perfil">+</button></div>
-        </form>
+        <p class="gate-feedback" id="profile-feedback" role="status" aria-live="polite">Preparando seu perfil…</p>
         <button class="text-button" id="logout-button" type="button">Sair da conta</button>
-        <p class="gate-feedback" id="profile-feedback" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -58,7 +53,7 @@
         <a class="nav-link" href="#placar">Placar</a>
         <a class="nav-link" id="admin-link" href="#admin-panel" hidden>Admin</a>
       </nav>
-      <div class="account-actions"><button class="active-profile" id="active-profile" type="button" aria-label="Trocar perfil"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></button><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
+      <div class="account-actions"><div class="active-profile" id="active-profile" role="status" aria-label="Perfil da conta"><span class="profile" id="profile-avatar">?</span><span class="active-profile-name" id="profile-label">Perfil</span><span aria-hidden="true">⌄</span></div><button class="text-button compact" id="header-logout" type="button">Sair</button></div>
     </header>
 
     <main id="inicio">
@@ -145,8 +140,8 @@
     </main>
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>FEITO PARA APRENDER, UM DESAFIO POR VEZ.</span></footer>
     <script src="supabase-config.js"></script>
-    <script type="module" src="app.js"></script>
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="app.js?v=single-profile-admin-fix-20261027"></script>
+    <script type="module" src="admin.js?v=single-profile-admin-fix-20261027"></script>
     </div>
   </body>
 </html>
