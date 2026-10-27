@@ -484,11 +484,21 @@ if (config.url && config.publishableKey) {
     if (currentRole === 'owner') await loadOwnerAccounts();
   }
 
+  function setAdminView(isOpen) {
+    document.body.classList.toggle('admin-mode', isOpen);
+    adminPanel.hidden = !isOpen;
+    adminLink.classList.toggle('active', isOpen);
+    const selectedHash = window.location.hash || '#desafio';
+    document.querySelectorAll('.topbar nav .nav-link:not(#admin-link)').forEach((link) => {
+      link.classList.toggle('active', !isOpen && link.hash === selectedHash);
+    });
+  }
+
   async function setCurrentUser(user) {
     currentUser = user;
     currentRole = null;
     adminLink.hidden = true;
-    adminPanel.hidden = true;
+    setAdminView(false);
     if (!user) return;
 
     const { data, error } = await supabase
@@ -500,7 +510,10 @@ if (config.url && config.publishableKey) {
 
     currentRole = data.role;
     adminLink.hidden = false;
-    if (!adminPanel.hidden) await loadAdminDashboard();
+    if (window.location.hash === '#admin-panel') {
+      setAdminView(true);
+      await loadAdminDashboard();
+    }
   }
 
   challengeSelector.addEventListener('change', () => {
@@ -510,14 +523,23 @@ if (config.url && config.publishableKey) {
 
   document.querySelector('#new-challenge-button').addEventListener('click', clearChallengeForm);
   document.querySelector('#refresh-reviews-button').addEventListener('click', loadReviewQueue);
-  adminLink.addEventListener('click', (event) => {
-    event.preventDefault();
+  adminLink.addEventListener('click', () => {
     if (!currentRole) return;
-    adminPanel.hidden = false;
+    setAdminView(true);
     void loadAdminDashboard();
-    window.requestAnimationFrame(() => {
-      adminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+  });
+
+  document.querySelectorAll('.topbar nav .nav-link:not(#admin-link)').forEach((link) => {
+    link.addEventListener('click', () => setAdminView(false));
+  });
+
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#admin-panel' && currentRole) {
+      setAdminView(true);
+      void loadAdminDashboard();
+    } else if (window.location.hash !== '#admin-panel') {
+      setAdminView(false);
+    }
   });
 
   challengeForm.addEventListener('submit', async (event) => {
