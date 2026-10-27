@@ -486,7 +486,10 @@ if (config.url && config.publishableKey) {
       const row = document.createElement('div');
       row.className = 'admin-account-row';
       const text = document.createElement('span');
-      text.textContent = (names.get(admin.user_id) || ('Conta ' + admin.user_id.slice(0, 8))) + ' · ' + (admin.role === 'owner' ? 'Dono' : 'Educador');
+      const accountName = names.get(admin.user_id) || ('Conta ' + admin.user_id.slice(0, 8));
+      const roleName = admin.role === 'owner' ? 'Dono' : 'Educador';
+      const isCurrentUser = currentUser?.id === admin.user_id;
+      text.textContent = accountName + ' · ' + roleName + (isCurrentUser ? ' · Você' : '') + ' · ID ' + admin.user_id.slice(0, 8);
       row.append(text);
       if (admin.role === 'educator') {
         const remove = document.createElement('button');
