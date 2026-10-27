@@ -12,6 +12,19 @@ const nameField = document.querySelector('#auth-name');
 const authSubmit = document.querySelector('#auth-submit');
 const selectedProfileLabel = document.querySelector('#profile-label');
 const selectedProfileAvatar = document.querySelector('#profile-avatar');
+const editProfileNameButton = document.querySelector('#edit-profile-name');
+const profileNameDialog = document.querySelector('#profile-name-dialog');
+const profileNameForm = document.querySelector('#profile-name-form');
+const profileNameInput = document.querySelector('#profile-name-input');
+const profileNameFeedback = document.querySelector('#profile-name-feedback');
+const saveProfileNameButton = document.querySelector('#save-profile-name');
+const forgotPasswordButton = document.querySelector('#forgot-password-button');
+const passwordRecoveryDialog = document.querySelector('#password-recovery-dialog');
+const passwordRecoveryForm = document.querySelector('#password-recovery-form');
+const newPasswordInput = document.querySelector('#new-password');
+const passwordRecoveryFeedback = document.querySelector('#password-recovery-feedback');
+const saveNewPasswordButton = document.querySelector('#save-new-password');
+
 
 let mode = 'login';
 let supabase;
@@ -45,11 +58,15 @@ function showAuthMessage(message, isError = false) {
 
 function authErrorMessage(error) {
   if (error.code === 'over_email_send_rate_limit' || error.message?.toLowerCase().includes('email rate limit exceeded')) {
-    return 'O limite temporário de e-mails do Supabase foi atingido. Aguarde um pouco e tente novamente. Para enviar confirmações a amigos, o projeto precisa de SMTP próprio.';
+    return 'O limite temporário de e-mails do Supabase foi atingido. Aguarde antes de pedir outro e-mail. Para envios mais frequentes, o projeto precisa de SMTP próprio.';
   }
   if (error.code === 'email_address_not_authorized') {
     return 'O envio padrão do Supabase só atende endereços autorizados. Para aceitar cadastros de amigos, configure um SMTP próprio.';
   }
+  if (error.message?.toLowerCase().includes('redirect') || error.code === 'validation_failed') {
+    return 'O link de recuperação não foi aceito. Confira se o endereço do site está cadastrado nas URLs permitidas do Supabase.';
+  }
+
   return error.message || 'Não foi possível entrar. Confira os dados e tente novamente.';
 }
 
@@ -271,6 +288,98 @@ authForm.addEventListener('submit', async (event) => {
 
 document.querySelector('#logout-button').addEventListener('click', signOut);
 document.querySelector('#header-logout').addEventListener('click', signOut);
+editProfileNameButton.addEventListener('click', () => {
+  if (!currentProfile) return;
+  profileNameInput.value = currentProfile.name;
+  profileNameFeedback.textContent = '';
+  profileNameDialog.showModal();
+});
+
+document.querySelector('#cancel-profile-name').addEventListener('click', () => profileNameDialog.close());
+
+profileNameForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const name = profileNameInput.value.trim();
+  if (!currentProfile || !name || name.length > 32) {
+    profileNameFeedback.textContent = 'Use um nome entre 1 e 32 caracteres.';
+    return;
+  }
+
+  saveProfileNameButton.disabled = true;
+  profileNameFeedback.textContent = 'Salvando…';
+  const { data, error } = await supabase
+    .from('game_profiles')
+    .update({ name })
+    .eq('id', currentProfile.id)
+    .select('id, name')
+    .single();
+
+  if (error) {
+    profileNameFeedback.textContent = 'Não foi possível salvar o nome. Tente novamente.';
+    saveProfileNameButton.disabled = false;
+    return;
+  }
+
+  currentProfile = data;
+  selectedProfileLabel.textContent = data.name;
+  selectedProfileAvatar.textContent = initials(data.name);
+  profileNameDialog.close();
+  window.dispatchEvent(new CustomEvent('codequest:profile-name-updated', {
+    detail: { profile: data, user: currentUser },
+  }));
+  await loadLeaderboard();
+  saveProfileNameButton.disabled = false;
+});
+
+document.querySelector('#cancel-password-recovery').addEventListener('click', () => {
+  passwordRecoveryDialog.close();
+  showScreen('auth');
+  showAuthMessage('Recuperação cancelada.');
+});
+
+forgotPasswordButton.addEventListener('click', async () => {
+  const emailField = document.querySelector('#auth-email');
+  const email = emailField.value.trim();
+  if (!email) {
+    showAuthMessage('Digite seu e-mail para receber o link de recuperação.', true);
+    emailField.focus();
+    return;
+  }
+
+  forgotPasswordButton.disabled = true;
+  showAuthMessage('Enviando o link de recuperação…');
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname,
+  });
+  if (error) showAuthMessage(authErrorMessage(error), true);
+  else showAuthMessage('Se houver uma conta com esse e-mail, enviaremos um link para trocar a senha.');
+  forgotPasswordButton.disabled = false;
+});
+
+passwordRecoveryForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const password = newPasswordInput.value;
+  if (password.length < 8) {
+    passwordRecoveryFeedback.textContent = 'A senha precisa ter pelo menos 8 caracteres.';
+    return;
+  }
+
+  saveNewPasswordButton.disabled = true;
+  passwordRecoveryFeedback.textContent = 'Salvando…';
+  const { data, error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    passwordRecoveryFeedback.textContent = authErrorMessage(error);
+    saveNewPasswordButton.disabled = false;
+    return;
+  }
+
+  currentUser = data.user;
+  newPasswordInput.value = '';
+  passwordRecoveryDialog.close();
+  await openProfilePicker();
+  saveNewPasswordButton.disabled = false;
+});
+
 
 document.querySelector('#submit-button').addEventListener('click', async () => {
   const answerField = document.querySelector('#solution');
@@ -357,12 +466,25 @@ async function start() {
   window.setInterval(loadLeaderboard, 30000);
   window.addEventListener('focus', loadLeaderboard);
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT') {
+    if (event === 'PASSWORD_RECOVERY') {
+      currentUser = session?.user || currentUser;
+      showScreen('auth');
+      passwordRecoveryFeedback.textContent = '';
+      newPasswordInput.value = '';
+      if (!passwordRecoveryDialog.open) passwordRecoveryDialog.showModal();
+    } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       currentProfile = null;
       showScreen('auth');
       showAuthMessage('Você saiu da sua conta.');
     } else if (event === 'SIGNED_IN' && session?.user) {
+      if (window.location.hash.includes('type=recovery')) {
+        currentUser = session.user;
+        showScreen('auth');
+        passwordRecoveryFeedback.textContent = '';
+        if (!passwordRecoveryDialog.open) passwordRecoveryDialog.showModal();
+        return;
+      }
       window.setTimeout(() => {
         currentUser = session.user;
         openProfilePicker();
