@@ -8,6 +8,9 @@ create table if not exists public.game_profiles (
 create index if not exists game_profiles_owner_created_idx
   on public.game_profiles (owner_id, created_at);
 
+create unique index if not exists game_profiles_one_per_account
+  on public.game_profiles (owner_id);
+
 alter table public.game_profiles enable row level security;
 
 drop policy if exists "Owners can read their game profiles" on public.game_profiles;
