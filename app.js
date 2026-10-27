@@ -426,11 +426,14 @@ document.querySelector('#submit-button').addEventListener('click', async () => {
     if (lookupError) throw lookupError;
 
     if (existingSubmission) {
-      const { error } = await supabase
+      const { data: updatedSubmission, error } = await supabase
         .from('challenge_submissions')
         .update({ answer, language: languageField.value })
-        .eq('id', existingSubmission.id);
+        .eq('id', existingSubmission.id)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (!updatedSubmission) throw new Error('A resposta não foi atualizada. Confira se o prazo ainda está aberto.');
     } else {
       const { error } = await supabase
         .from('challenge_submissions')
@@ -442,10 +445,11 @@ document.querySelector('#submit-button').addEventListener('click', async () => {
         });
       if (error) throw error;
     }
-    feedback.textContent = 'Resposta enviada e aguardando revisão. O placar soma pontos após aprovação.';
+    localStorage.removeItem(draftKey);
+    feedback.textContent = 'Resposta enviada para revisão. Ela entrará no placar após a aprovação.';
     await loadLeaderboard();
   } catch (error) {
-    feedback.textContent = 'Não foi possível enviar agora. Seu rascunho continua salvo. ' + (error.message || 'Tente novamente.');
+    feedback.textContent = 'A resposta ainda não foi enviada para revisão. O rascunho está salvo apenas neste navegador. ' + (error.message || 'Tente novamente.');
     feedback.style.color = '#ff9e9e';
   } finally {
     submitButton.disabled = false;
