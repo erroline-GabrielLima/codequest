@@ -34,6 +34,7 @@ create policy "Owners can delete their game profiles"
   on public.game_profiles for delete to authenticated
   using ((select auth.uid()) = owner_id);
 
+revoke all on public.game_profiles from public, anon;
 grant select, insert, update, delete on public.game_profiles to authenticated;
 
 
