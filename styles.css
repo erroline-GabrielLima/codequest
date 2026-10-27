@@ -26,3 +26,5 @@
 @media(max-width:720px){.account-dialog{padding:23px}.dialog-actions .button{flex:1}.account-actions{gap:7px}.account-actions #edit-profile-name{font-size:9px}}
 
 .admin-review-tools{display:flex;align-items:center;gap:9px}
+
+.edit-profile-short{display:none}@media(max-width:720px){.edit-profile-full{display:none}.edit-profile-short{display:inline}}
