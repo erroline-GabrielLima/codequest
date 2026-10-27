@@ -418,8 +418,8 @@ if (config.url && config.publishableKey) {
     }
 
     const submissions = data || [];
-    const pendingCount = submissions.filter((row) => row.status === 'pending').length;
-    reviewCount.textContent = pendingCount + (pendingCount === 1 ? ' pendente' : ' pendentes');
+    const rowCount = submissions.length;
+    reviewCount.textContent = rowCount + (rowCount === 1 ? ' resposta' : ' respostas');
     reviewList.replaceChildren();
     if (submissions.length === 0) {
       const empty = document.createElement('div');
