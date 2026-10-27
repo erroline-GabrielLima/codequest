@@ -308,15 +308,31 @@ document.querySelector('#submit-button').addEventListener('click', async () => {
   feedback.textContent = 'Enviando sua solução…';
 
   try {
-    const { error } = await supabase
+    const { data: existingSubmission, error: lookupError } = await supabase
       .from('challenge_submissions')
-      .upsert({
-        profile_id: currentProfile.id,
-        challenge_id: challengeId,
-        answer,
-        language: languageField.value,
-      }, { onConflict: 'profile_id,challenge_id' });
-    if (error) throw error;
+      .select('id')
+      .eq('profile_id', currentProfile.id)
+      .eq('challenge_id', challengeId)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+
+    if (existingSubmission) {
+      const { error } = await supabase
+        .from('challenge_submissions')
+        .update({ answer, language: languageField.value })
+        .eq('id', existingSubmission.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('challenge_submissions')
+        .insert({
+          profile_id: currentProfile.id,
+          challenge_id: challengeId,
+          answer,
+          language: languageField.value,
+        });
+      if (error) throw error;
+    }
     feedback.textContent = 'Resposta enviada e aguardando revisão. O placar soma pontos após aprovação.';
     await loadLeaderboard();
   } catch (error) {
