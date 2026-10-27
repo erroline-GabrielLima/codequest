@@ -510,8 +510,14 @@ if (config.url && config.publishableKey) {
 
   document.querySelector('#new-challenge-button').addEventListener('click', clearChallengeForm);
   document.querySelector('#refresh-reviews-button').addEventListener('click', loadReviewQueue);
-  adminLink.addEventListener('click', () => {
-    if (currentRole) void loadAdminDashboard();
+  adminLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (!currentRole) return;
+    adminPanel.hidden = false;
+    void loadAdminDashboard();
+    window.requestAnimationFrame(() => {
+      adminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
 
   challengeForm.addEventListener('submit', async (event) => {
