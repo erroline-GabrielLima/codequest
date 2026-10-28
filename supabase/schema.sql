@@ -594,3 +594,69 @@ create trigger sync_profile_name_to_leaderboard
   for each row
   when (old.name is distinct from new.name)
   execute function private.sync_profile_name_to_leaderboard();
+
+
+-- A response score cannot exceed its challenge's configured maximum.
+create or replace function private.validate_submission_score_maximum()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $$
+declare
+  challenge_maximum integer;
+begin
+  if new.status <> 'approved' or new.awarded_points is null then
+    return new;
+  end if;
+
+  select c.points into challenge_maximum
+  from public.challenges c
+  where c.id = new.challenge_id;
+
+  if challenge_maximum is null then
+    raise exception 'challenge score maximum is unavailable';
+  end if;
+
+  if new.awarded_points < 0 or new.awarded_points > challenge_maximum then
+    raise exception 'challenge score maximum is % points', challenge_maximum
+      using errcode = 'check_violation';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function private.validate_submission_score_maximum() from public, anon, authenticated;
+drop trigger if exists validate_submission_score_maximum on public.challenge_submissions;
+create trigger validate_submission_score_maximum
+  before insert or update of challenge_id, status, awarded_points
+  on public.challenge_submissions
+  for each row execute function private.validate_submission_score_maximum();
+
+-- Keep an established challenge maximum from being reduced below grades already awarded.
+create or replace function private.prevent_challenge_maximum_below_awarded_scores()
+returns trigger
+language plpgsql
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.points is distinct from old.points and exists (
+    select 1
+    from public.challenge_submissions cs
+    where cs.challenge_id = old.id
+      and cs.status = 'approved'
+      and cs.awarded_points > new.points
+  ) then
+    raise exception 'challenge maximum cannot be lower than an awarded score'
+      using errcode = 'check_violation';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function private.prevent_challenge_maximum_below_awarded_scores() from public, anon, authenticated;
+drop trigger if exists prevent_challenge_maximum_below_awarded_scores on public.challenges;
+create trigger prevent_challenge_maximum_below_awarded_scores
+  before update of points on public.challenges
+  for each row execute function private.prevent_challenge_maximum_below_awarded_scores();
