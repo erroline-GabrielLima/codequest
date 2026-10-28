@@ -73,7 +73,7 @@
           <div class="section-heading"><div><p class="eyebrow">DESAFIO DE EXEMPLO</p><h2 id="challenge-title">O primeiro passo</h2></div><span class="difficulty" id="challenge-difficulty">INICIANTE</span></div>
           <p class="challenge-text" id="challenge-description">Escreva um programa que receba seu nome e mostre uma mensagem de boas-vindas.</p>
           <div class="example" id="challenge-example" hidden><span class="example-label">EXEMPLO</span><code id="challenge-example-text"></code></div>
-          <div class="challenge-meta"><span id="challenge-window-label">Sem prazo definido</span><span id="challenge-time-state">Disponível</span></div>
+          <div class="challenge-meta"><span id="challenge-window-label">Sem prazo definido</span><span id="challenge-time-state">Disponível</span><span id="challenge-points-label">Até 10 pts</span></div>
         </section>
 
         <section class="panel submit-panel" id="envio">
@@ -114,7 +114,7 @@
             <textarea id="admin-challenge-description" name="description" rows="4" maxlength="5000" required></textarea>
             <div class="admin-form-grid">
               <div><label class="field-label" for="admin-challenge-difficulty">NÍVEL</label><select id="admin-challenge-difficulty" name="difficulty"><option>INICIANTE</option><option>INTERMEDIÁRIO</option><option>AVANÇADO</option></select></div>
-              <div><label class="field-label" for="admin-challenge-points">PONTOS</label><input id="admin-challenge-points" name="points" type="number" min="0" max="1000" value="10" required /></div>
+              <div><label class="field-label" for="admin-challenge-points">NOTA MÁXIMA DO DESAFIO</label><input id="admin-challenge-points" name="points" type="number" min="0" max="1000" value="10" required /><small class="admin-help">A avaliação de cada resposta poderá chegar até esse valor.</small></div>
               <div><label class="field-label" for="admin-challenge-start">ABRE EM</label><input id="admin-challenge-start" name="starts_at" type="datetime-local" /></div>
               <div><label class="field-label" for="admin-challenge-end">PRAZO FINAL</label><input id="admin-challenge-end" name="ends_at" type="datetime-local" /></div>
             </div>
@@ -136,7 +136,7 @@
     <footer><span class="brand small"><span class="brand-mark">&lt;/&gt;</span> codequest</span><span>CODEQUEST · DESAFIOS DE PROGRAMAÇÃO</span></footer>
     <script src="supabase-config.js"></script>
     <script type="module" src="app.js?v=account-recovery-draft-20261027"></script>
-    <script type="module" src="admin.js?v=account-controls-20261027"></script>
+    <script type="module" src="admin.js?v=challenge-score-cap-20261028"></script>
     </div>
     <dialog class="account-dialog" id="profile-name-dialog" aria-labelledby="profile-name-title">
       <form id="profile-name-form">
