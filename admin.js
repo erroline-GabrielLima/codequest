@@ -185,6 +185,7 @@ if (config.url && config.publishableKey) {
     document.querySelector('#challenge-title').textContent = currentChallenge.title;
     document.querySelector('#challenge-description').textContent = currentChallenge.description;
     document.querySelector('#challenge-difficulty').textContent = currentChallenge.difficulty;
+    document.querySelector('#challenge-points-label').textContent = 'Até ' + currentChallenge.points + ' pts';
     const exampleText = String(currentChallenge.example_text || '').trim();
     document.querySelector('#challenge-example-text').textContent = exampleText;
     document.querySelector('#challenge-example').hidden = !exampleText;
@@ -315,15 +316,16 @@ if (config.url && config.publishableKey) {
 
     const scoreLabel = document.createElement('label');
     scoreLabel.className = 'field-label';
-    scoreLabel.textContent = 'PONTOS DESTA RESPOSTA (0 A 1000)';
+    const challengeMaximum = Number(challenge?.points ?? 10);
+    scoreLabel.textContent = 'PONTOS DESTA RESPOSTA (0 A ' + challengeMaximum + ')';
     const scoreInput = document.createElement('input');
     scoreInput.type = 'number';
     scoreInput.min = '0';
-    scoreInput.max = '1000';
+    scoreInput.max = String(challengeMaximum);
     scoreInput.step = '1';
     scoreInput.required = true;
     scoreInput.className = 'admin-score-input';
-    scoreInput.value = String(submission.awarded_points ?? challenge?.points ?? 10);
+    scoreInput.value = String(submission.awarded_points ?? challengeMaximum);
     const scoreFeedback = document.createElement('p');
     scoreFeedback.className = 'form-feedback admin-score-feedback';
     scoreFeedback.setAttribute('role', 'status');
@@ -363,8 +365,8 @@ if (config.url && config.publishableKey) {
         feedbackBox.focus();
         return;
       }
-      if (status === 'approved' && (!scoreText || !Number.isInteger(awardedPoints) || awardedPoints < 0 || awardedPoints > 1000)) {
-        scoreFeedback.textContent = 'Informe uma pontuação inteira entre 0 e 1000.';
+      if (status === 'approved' && (!scoreText || !Number.isInteger(awardedPoints) || awardedPoints < 0 || awardedPoints > challengeMaximum)) {
+        scoreFeedback.textContent = 'Informe uma pontuação inteira entre 0 e ' + challengeMaximum + ' pontos.';
         scoreFeedback.classList.add('admin-error');
         scoreInput.focus();
         return;
@@ -383,7 +385,10 @@ if (config.url && config.publishableKey) {
         })
         .eq('id', submission.id);
       if (result.error) {
-        setFeedback(document.querySelector('#admin-role-label'), 'Falha ao salvar a revisão: ' + result.error.message, true);
+        const scoreLimitError = result.error.message?.includes('challenge score maximum');
+      setFeedback(document.querySelector('#admin-role-label'), scoreLimitError
+        ? 'A nota não pode ultrapassar o máximo definido para este desafio.'
+        : 'Falha ao salvar a revisão: ' + result.error.message, true);
         approve.disabled = false;
         requestChanges.disabled = false;
         return;
@@ -588,7 +593,7 @@ if (config.url && config.publishableKey) {
     const endsAt = isoDate(String(form.get('ends_at') || ''));
     const feedbackNode = document.querySelector('#challenge-feedback');
     if (!Number.isInteger(points) || points < 0 || points > 1000) {
-      setFeedback(feedbackNode, 'Os pontos precisam ficar entre 0 e 1000.', true);
+      setFeedback(feedbackNode, 'A nota máxima do desafio precisa ficar entre 0 e 1000 pontos.', true);
       return;
     }
     if (startsAt && endsAt && new Date(startsAt) >= new Date(endsAt)) {
